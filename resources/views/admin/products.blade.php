@@ -52,6 +52,7 @@
                                 <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
                             </th>
                             <th class="px-6 py-4">Product Name</th>
+                            <th class="px-6 py-4">Brand</th>
                             <th class="px-6 py-4">Category</th>
                             <th class="px-6 py-4">Price</th>
                             <th class="px-6 py-4">Stock</th>
@@ -67,18 +68,32 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <img src="assets/images/product/product-01.jpg" class="w-12 h-12 rounded object-cover border" alt="Prod">
+                                    <img src="{{ asset('uploads/products/thumbnails') }}/{{ $product->image}}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
                                     <div>
-                                        <p class="font-semibold text-gray-800 text-sm">Elona Bedside Table</p>
-                                        <p class="text-xs text-gray-500">ID: #PROD-001</p>
+                                        <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
+                                        <p class="text-xs text-gray-500">SKU: {{ $product->sku }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">Furniture</td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-800">$140.00</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">45</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ $product->brand->name}}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ $product->category->name}}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-800">
+                                @if($product->sale_price)
+                                    <span class="line-through text-gray-400 mr-1">${{ number_format($product->regular_price, 2) }}</span>
+                                    <span class="text-primary">${{ number_format($product->sale_price, 2) }}</span>
+                                @else
+                                    <span>${{ number_format($product->price, 2) }}</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
                             <td class="px-6 py-4">
-                                <span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">Active</span>
+                                <span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                    @if($product->status)
+                                        Published
+                                    @else
+                                        Draft
+                                    @endif
+                                </span>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
@@ -110,16 +125,7 @@
             </div>
 
             <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <span class="text-sm text-gray-500">Showing <span class="font-bold text-gray-700">1-4</span> of <span class="font-bold text-gray-700">120</span> products</span>
-
-                <div class="flex gap-2">
-                    <button class="px-3 py-1 border rounded hover:bg-gray-50 text-gray-600 disabled:opacity-50 text-sm" disabled>Previous</button>
-                    <button class="px-3 py-1 border rounded bg-primary text-white text-sm">1</button>
-                    <button class="px-3 py-1 border rounded hover:bg-gray-50 text-gray-600 text-sm">2</button>
-                    <button class="px-3 py-1 border rounded hover:bg-gray-50 text-gray-600 text-sm">3</button>
-                    <span class="px-2 text-gray-400">...</span>
-                    <button class="px-3 py-1 border rounded hover:bg-gray-50 text-gray-600 text-sm">Next</button>
-                </div>
+                {{ $products->links() }}
             </div>
         </div>
 
