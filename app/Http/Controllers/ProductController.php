@@ -232,4 +232,33 @@ class ProductController extends Controller
         return redirect()->route('admin.products', $product->id)->with('success', 'Product updated successfully.');
     }
 
+    public function productDelete($id)
+    {
+        $product = Product::findOrFail($id);
+
+        if ($product->image && file_exists(public_path('uploads/products/' . $product->image))) {
+            @unlink(public_path('uploads/products/' . $product->image));
+        }
+
+        if ($product->image && file_exists(public_path('uploads/products/thumbnails/' . $product->image))) {
+            @unlink(public_path('uploads/products/thumbnails/' . $product->image));
+        }
+
+        if ($product->images) {
+            $gallery_images = explode(',', $product->images);
+            foreach ($gallery_images as $gallery_image) {
+                if ($gallery_image && file_exists(public_path('uploads/products/' . $gallery_image))) {
+                    @unlink(public_path('uploads/products/' . $gallery_image));
+                }
+                if ($gallery_image && file_exists(public_path('uploads/products/thumbnails/' . $gallery_image))) {
+                    @unlink(public_path('uploads/products/thumbnails/' . $gallery_image));
+                }
+            }
+        }
+
+        $product->delete();
+
+        return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
+    }
+
 }
