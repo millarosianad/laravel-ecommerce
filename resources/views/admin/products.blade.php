@@ -78,18 +78,18 @@
                                     <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
                                     <div>
                                         <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
-                                        <p class="text-xs text-gray-500">SKU: {{ $product->sku }}</p>
+                                        <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $product->brand->name}}</td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $product->category->name}}</td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-800">
-                                @if($product->sale_price)
+                                @if (!empty($product->sale_price) && $product->sale_price > 0)
                                     <span class="line-through text-gray-400 mr-1">${{ number_format($product->regular_price, 2) }}</span>
-                                    <span class="text-primary">${{ number_format($product->sale_price, 2) }}</span>
+                                    <span class="text-primary font-semibold">${{ number_format($product->sale_price, 2) }}</span>
                                 @else
-                                    <span>${{ number_format($product->price, 2) }}</span>
+                                    <span>${{ number_format($product->regular_price, 2) }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
@@ -104,7 +104,7 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="product-edit.php" class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center" title="Edit">
+                                    <a href="{{route('admin.product.edit',['id'=>$product->id])}}" class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center" title="Edit">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
                                     <button class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center" onclick="deleteProduct(this, 'Samsung', 101)" title="Delete">
