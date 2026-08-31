@@ -7,9 +7,15 @@
                 <h1 class="text-2xl font-bold text-gray-800">Products</h1>
                 <p class="text-sm text-gray-500">Manage your product catalog</p>
             </div>
-            <a href="{{ route('admin.product.add') }}" class="bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-plus"></i> Add New Product
-            </a>
+            <div class="flex gap-3">
+                <button type="button" id="bulkDeleteBtn" class=" hidden bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+                </button>
+
+                <a href="{{ route('admin.product.add') }}" class="bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Add New Product
+                </a>
+            </div>
         </div>
 
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
@@ -44,96 +50,101 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                @if(session()->has('success'))
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                        <strong class="font-bold">Success!</strong>
-                        <span class="block sm:inline">{{ session('success') }}</span>
-                    </div>
-                @endif
-                <table class="w-full text-left whitespace-nowrap">
-                    <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
-                        <tr>
-                            <th class="px-6 py-4">
-                                <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            </th>
-                            <th class="px-6 py-4">Product Name</th>
-                            <th class="px-6 py-4">Brand</th>
-                            <th class="px-6 py-4">Category</th>
-                            <th class="px-6 py-4">Price</th>
-                            <th class="px-6 py-4">Stock</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($products as $product)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4">
-                                <input type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary">
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    {{-- <img src="{{ asset('uploads/products/thumbnails') }}/{{ $product->image}}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}"> --}}
-                                    <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
-                                    <div>
-                                        <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
-                                        <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
+            <form id="bulkActionForm" method="POST" action="{{ route('admin.products.bulk.delete') }}">
+                @csrf
+                @method('DELETE')
+
+                <div class="overflow-x-auto">
+                    @if(session()->has('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                    @endif
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-4">
+                                    <input type="checkbox" id ="selectAll" class="rounded border-gray-300 text-primary focus:ring-primary">
+                                </th>
+                                <th class="px-6 py-4">Product Name</th>
+                                <th class="px-6 py-4">Brand</th>
+                                <th class="px-6 py-4">Category</th>
+                                <th class="px-6 py-4">Price</th>
+                                <th class="px-6 py-4">Stock</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($products as $product)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
+                                    <input type="checkbox" name="ids[]" value="{{ $product->id }}" class="product-checkbox rounded border-gray-300 text-primary focus:ring-primary">
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        {{-- <img src="{{ asset('uploads/products/thumbnails') }}/{{ $product->image}}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}"> --}}
+                                        <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
+                                        <div>
+                                            <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
+                                            <p class="text-xs text-gray-500">SKU: {{ $product->SKU }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ $product->brand->name}}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ $product->category->name}}</td>
-                            <td class="px-6 py-4 text-sm font-medium text-gray-800">
-                                @if (!empty($product->sale_price) && $product->sale_price > 0)
-                                    <span class="line-through text-gray-400 mr-1">${{ number_format($product->regular_price, 2) }}</span>
-                                    <span class="text-primary font-semibold">${{ number_format($product->sale_price, 2) }}</span>
-                                @else
-                                    <span>${{ number_format($product->regular_price, 2) }}</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
-                            <td class="px-6 py-4">
-                                <span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
-                                    @if($product->status)
-                                        Published
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $product->brand->name}}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $product->category->name}}</td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-800">
+                                    @if (!empty($product->sale_price) && $product->sale_price > 0)
+                                        <span class="line-through text-gray-400 mr-1">${{ number_format($product->regular_price, 2) }}</span>
+                                        <span class="text-primary font-semibold">${{ number_format($product->sale_price, 2) }}</span>
                                     @else
-                                        Draft
+                                        <span>${{ number_format($product->regular_price, 2) }}</span>
                                     @endif
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="{{route('admin.product.edit',['id'=>$product->id])}}" class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center" title="Edit">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </a>
-                                    <form id="delete-form-{{ $product->id }}" method="POST" action="{{ route('admin.product.delete', ['id' => $product->id]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center" onclick="deleteProduct(this, '{{ $product->name }}', {{ $product->id }})" title="Delete">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center text-gray-500">
-                                    <i class="fa-solid fa-boxes-stacked text-4xl mb-3 text-gray-300"></i>
-                                    <h3 class="text-lg font-medium text-gray-900">Products not available</h3>
-                                    <p class="text-sm mt-1">You haven't added any products to your store yet.</p>
-                                    <a href="{{route('admin.product.add')}}" class="mt-4 text-primary hover:underline text-sm font-medium">
-                                        Add your first product
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $product->quantity }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                        @if($product->status)
+                                            Published
+                                        @else
+                                            Draft
+                                        @endif
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{route('admin.product.edit',['id'=>$product->id])}}" class="w-8 h-8 rounded-full hover:bg-gray-100 text-blue-500 transition flex items-center justify-center" title="Edit">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <form id="delete-form-{{ $product->id }}" method="POST" action="{{ route('admin.product.delete', ['id' => $product->id]) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="w-8 h-8 rounded-full hover:bg-gray-100 text-red-500 transition flex items-center justify-center" onclick="deleteProduct(this, '{{ $product->name }}', {{ $product->id }})" title="Delete">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center text-gray-500">
+                                        <i class="fa-solid fa-boxes-stacked text-4xl mb-3 text-gray-300"></i>
+                                        <h3 class="text-lg font-medium text-gray-900">Products not available</h3>
+                                        <p class="text-sm mt-1">You haven't added any products to your store yet.</p>
+                                        <a href="{{route('admin.product.add')}}" class="mt-4 text-primary hover:underline text-sm font-medium">
+                                            Add your first product
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </form>
 
             <div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 {{ $products->links() }}
@@ -225,5 +236,43 @@
             }
         });
     </script>
+
+    <script>
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const bulkForm = document.getElementById('bulkActionForm');
+
+        // Toggle all checkboxes
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateBulkButton();
+        });
+
+        // Toggle individual checkbox
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkButton);
+        });
+
+        function updateBulkButton() {
+            const checkedCount = document.querySelectorAll('.product-checkbox:checked').length;
+            selectedCountSpan.textContent = checkedCount;
+
+            if (checkedCount > 0) {
+                bulkDeleteBtn.classList.remove('hidden');
+            } else {
+                bulkDeleteBtn.classList.add('hidden');
+            }
+        }
+
+        // Bulk Delete Confirmation (Reusing your logic)
+    bulkDeleteBtn.addEventListener('click', () => {
+        const count = document.querySelectorAll('.product-checkbox:checked').length;
+        if(confirm(`Are you sure you want to delete ${count} selected products?`)) {
+            bulkForm.submit();
+        }
+    });
+</script>
     
 </x-admin-layout>
