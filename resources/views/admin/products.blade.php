@@ -7,7 +7,7 @@
                 <h1 class="text-2xl font-bold text-gray-800">Products</h1>
                 <p class="text-sm text-gray-500">Manage your product catalog</p>
             </div>
-            <a href="product-add.php" class="bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
+            <a href="{{ route('admin.product.add') }}" class="bg-primary hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-sm">
                 <i class="fa-solid fa-plus"></i> Add New Product
             </a>
         </div>
@@ -45,6 +45,12 @@
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
+                @if(session()->has('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <strong class="font-bold">Success!</strong>
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                @endif
                 <table class="w-full text-left whitespace-nowrap">
                     <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
                         <tr>
@@ -68,7 +74,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <img src="{{ asset('uploads/products/thumbnails') }}/{{ $product->image}}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
+                                    {{-- <img src="{{ asset('uploads/products/thumbnails') }}/{{ $product->image}}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}"> --}}
+                                    <img src="{{ asset('uploads/products/thumbnails/' . $product->image) }}" class="w-12 h-12 rounded object-cover border" alt="{{ $product->name }}">
                                     <div>
                                         <p class="font-semibold text-gray-800 text-sm">{{ $product->name }}</p>
                                         <p class="text-xs text-gray-500">SKU: {{ $product->sku }}</p>
@@ -113,7 +120,7 @@
                                     <i class="fa-solid fa-boxes-stacked text-4xl mb-3 text-gray-300"></i>
                                     <h3 class="text-lg font-medium text-gray-900">Products not available</h3>
                                     <p class="text-sm mt-1">You haven't added any products to your store yet.</p>
-                                    <a href="category-add.php" class="mt-4 text-primary hover:underline text-sm font-medium">
+                                    <a href="{{route('admin.product.add')}}" class="mt-4 text-primary hover:underline text-sm font-medium">
                                         Add your first product
                                     </a>
                                 </div>
