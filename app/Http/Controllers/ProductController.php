@@ -11,6 +11,8 @@ use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProductExport;
 
 class ProductController extends Controller
 {
@@ -361,6 +363,11 @@ class ProductController extends Controller
 
         return back()->with('success', count($ids) . ' selected products deleted successfully.');
 
+    }
+
+    public function productExport()
+    {
+        return Excel::download(new ProductExport, 'products.xlsx');
     }
 
 }
