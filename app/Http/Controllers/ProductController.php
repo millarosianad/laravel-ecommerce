@@ -51,6 +51,9 @@ class ProductController extends Controller
 
     public function products(Request $request)
     {
+        $sort_by = $request->input('sort_by', 'created_at');
+        $sort_order = $request->input('sort_order', 'desc');
+
         $query = Product::with(['category', 'brand']);
 
         // Filter Search
@@ -77,7 +80,7 @@ class ProductController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        $products = $query->orderBy('created_at', 'DESC')->paginate(10)->withQueryString();
+        $products = $query->orderBy($sort_by, $sort_order)->paginate(10)->withQueryString();
 
         $categories = Category::select('id', 'name')->orderBy('name', 'asc')->get();
         $brands = Brand::select('id', 'name')->orderBy('name', 'asc')->get();
@@ -369,5 +372,7 @@ class ProductController extends Controller
     {
         return Excel::download(new ProductExport, 'products.xlsx');
     }
+
+
 
 }
